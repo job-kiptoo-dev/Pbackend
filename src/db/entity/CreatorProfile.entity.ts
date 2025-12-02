@@ -4,6 +4,7 @@ import {
   Entity,
   OneToOne,
   PrimaryGeneratedColumn,
+  JoinColumn,
 } from "typeorm";
 import { User } from "./User";
 
@@ -13,6 +14,7 @@ export class CreatorProfile extends BaseEntity {
   id: number;
 
   @OneToOne(() => User, (user) => user.creatorProfile)
+  @JoinColumn()
   user: User;
 
   @Column({ nullable: true })

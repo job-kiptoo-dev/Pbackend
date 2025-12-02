@@ -22,24 +22,38 @@ async function seed() {
     // Create a regular user
     const passwordHash = await bcrypt.hash("Password123!", 10);
 
-    const user1 = new User();
-    user1.email = "alice@example.com";
-    user1.password = passwordHash;
-    user1.firstName = "Alice";
-    user1.lastName = "Anderson";
-    user1.isVerified = true;
-    user1.accountType = "Individual" as any;
-    await user1.save();
+    let user1 = await User.findOne({ where: { email: "alice@example.com" } });
+    if (user1) {
+      console.log("Seeding: user1 already exists ->", user1.id);
+    } else {
+      user1 = new User();
+      user1.email = "alice@example.com";
+      user1.password = passwordHash;
+      user1.firstName = "Alice";
+      user1.lastName = "Anderson";
+      user1.isVerified = true;
+      user1.accountType = "Individual" as any;
+      console.log("Seeding: saving user1...");
+      await user1.save();
+      console.log("Seeding: saved user1 ->", user1.id);
+    }
 
     // Create a creator user
-    const creator = new User();
-    creator.email = "creator@example.com";
-    creator.password = passwordHash;
-    creator.firstName = "Cara";
-    creator.lastName = "Creator";
-    creator.isVerified = true;
-    creator.accountType = "Creator" as any;
-    await creator.save();
+    let creator = await User.findOne({ where: { email: "creator@example.com" } });
+    if (creator) {
+      console.log("Seeding: creator already exists ->", creator.id);
+    } else {
+      creator = new User();
+      creator.email = "creator@example.com";
+      creator.password = passwordHash;
+      creator.firstName = "Cara";
+      creator.lastName = "Creator";
+      creator.isVerified = true;
+      creator.accountType = "Creator" as any;
+      console.log("Seeding: saving creator user...");
+      await creator.save();
+      console.log("Seeding: saved creator ->", creator.id);
+    }
 
     // Create CreatorProfile
     const profile = new CreatorProfile();
@@ -52,7 +66,9 @@ async function seed() {
     profile.industryPreference = "Technology";
     profile.community = "Tech Creators";
     profile.rating = 4;
+    console.log("Seeding: saving creator profile...");
     await profile.save();
+    console.log("Seeding: saved profile ->", profile.id);
 
     // Create a sample campaign
     const campaign = Campaign.create({
@@ -68,7 +84,9 @@ async function seed() {
       teams: [],
       feedback: [],
     });
+    console.log("Seeding: saving campaign...");
     await campaign.save();
+    console.log("Seeding: saved campaign ->", campaign.id);
 
     // Create a sample job owned by creator
     const job = Job.create({
@@ -96,7 +114,9 @@ async function seed() {
       isActive: true,
     });
 
+    console.log("Seeding: saving job...");
     await job.save();
+    console.log("Seeding: saved job ->", job.id);
 
     // Create a proposal from user1
     const proposal = JobProposal.create({
@@ -110,7 +130,9 @@ async function seed() {
       status: "pending",
     });
 
+    console.log("Seeding: saving proposal...");
     await proposal.save();
+    console.log("Seeding: saved proposal ->", proposal.id);
 
     // Add a collaboration invite from creator to user1
     const collab = CollaborationEntity.create({
@@ -128,7 +150,9 @@ async function seed() {
       invitationToken: generateVerificationToken(),
     });
 
+    console.log("Seeding: saving collaboration...");
     await collab.save();
+    console.log("Seeding: saved collaboration ->", collab.id);
 
     console.log("Seeding complete:");
     console.log(" - user:", user1.email);
