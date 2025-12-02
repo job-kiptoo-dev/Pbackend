@@ -12,9 +12,6 @@ declare global {
   }
 }
 
-/**
- * Middleware to authenticate user using JWT token
- */
 export const authenticate = async (
   req: Request,
   res: Response,
@@ -64,9 +61,6 @@ export const authenticate = async (
   }
 };
 
-/**
- * Example of a role-based middleware (can be expanded as needed)
- */
 // export const requireAdmin = (req: Request, res: Response, next: NextFunction) : void => {
 //   // This is a placeholder - you would need to add a role field to your User entity
 //   // if (req.user && req.user.role === 'admin') {

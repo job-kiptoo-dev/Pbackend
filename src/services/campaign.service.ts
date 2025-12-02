@@ -1,9 +1,6 @@
 import { Campaign, CampaignMilestone, CampaignTeam, CampaignFeedback } from "../db/entity/Campaign.entity";
 
 export class CampaignService {
-  /**
-   * Create a new campaign
-   */
   async createCampaign(data: {
     title: string;
     description?: string;
@@ -30,18 +27,12 @@ export class CampaignService {
     return await campaign.save();
   }
 
-  /**
-   * Get all campaigns
-   */
   async getAllCampaigns(): Promise<Campaign[]> {
     return await Campaign.find({
       relations: ["milestones", "teams", "teams.members", "feedback"],
     });
   }
 
-  /**
-   * Get a campaign by ID
-   */
   async getCampaignById(id: number): Promise<Campaign | null> {
     return await Campaign.findOne({
       where: { id },
@@ -49,9 +40,6 @@ export class CampaignService {
     });
   }
 
-  /**
-   * Update a campaign
-   */
   async updateCampaign(
     id: number,
     data: {
@@ -76,9 +64,6 @@ export class CampaignService {
     return await campaign.save();
   }
 
-  /**
-   * Delete a campaign
-   */
   async deleteCampaign(id: number): Promise<boolean> {
     const campaign = await this.getCampaignById(id);
     if (!campaign) return false;
@@ -87,27 +72,19 @@ export class CampaignService {
     return true;
   }
 
-  /**
-   * Add milestone to campaign
-   */
   async addMilestone(campaignId: number, milestone: Partial<CampaignMilestone>): Promise<Campaign | null> {
     const campaign = await this.getCampaignById(campaignId);
     if (!campaign) return null;
 
-    // Create instance and assign properties to avoid TypeORM create() overload
     const newMilestone = new CampaignMilestone();
     Object.assign(newMilestone, milestone);
     newMilestone.campaign = campaign;
 
     await newMilestone.save();
 
-    // Refresh campaign to get updated milestones
     return await this.getCampaignById(campaignId);
   }
 
-  /**
-   * Update milestone
-   */
   async updateMilestone(
     campaignId: number,
     milestoneId: number,
@@ -123,9 +100,6 @@ export class CampaignService {
     return await milestone.save();
   }
 
-  /**
-   * Delete milestone
-   */
   async deleteMilestone(campaignId: number, milestoneId: number): Promise<boolean> {
     const milestone = await CampaignMilestone.findOne({
       where: { id: milestoneId, campaign: { id: campaignId } },
@@ -137,9 +111,6 @@ export class CampaignService {
     return true;
   }
 
-  /**
-   * Add team to campaign
-   */
   async addTeam(campaignId: number, team: Partial<CampaignTeam>): Promise<Campaign | null> {
     const campaign = await this.getCampaignById(campaignId);
     if (!campaign) return null;
@@ -151,13 +122,9 @@ export class CampaignService {
 
     await newTeam.save();
 
-    // Refresh campaign
     return await this.getCampaignById(campaignId);
   }
 
-  /**
-   * Delete team
-   */
   async deleteTeam(campaignId: number, teamId: number): Promise<boolean> {
     const team = await CampaignTeam.findOne({
       where: { id: teamId, campaign: { id: campaignId } },
@@ -169,9 +136,6 @@ export class CampaignService {
     return true;
   }
 
-  /**
-   * Add feedback to campaign
-   */
   async addFeedback(campaignId: number, feedback: Partial<CampaignFeedback>): Promise<Campaign | null> {
     const campaign = await this.getCampaignById(campaignId);
     if (!campaign) return null;
@@ -182,22 +146,15 @@ export class CampaignService {
 
     await newFeedback.save();
 
-    // Refresh campaign
     return await this.getCampaignById(campaignId);
   }
 
-  /**
-   * Get feedback for a campaign
-   */
   async getCampaignFeedback(campaignId: number): Promise<CampaignFeedback[]> {
     return await CampaignFeedback.find({
       where: { campaign: { id: campaignId } },
     });
   }
 
-  /**
-   * Delete feedback
-   */
   async deleteFeedback(campaignId: number, feedbackId: number): Promise<boolean> {
     const feedback = await CampaignFeedback.findOne({
       where: { id: feedbackId, campaign: { id: campaignId } },
@@ -209,9 +166,6 @@ export class CampaignService {
     return true;
   }
 
-  /**
-   * Get campaigns by user (created by)
-   */
   async getCampaignsByUser(createdby: string): Promise<Campaign[]> {
     return await Campaign.find({
       where: { createdby },
@@ -219,9 +173,6 @@ export class CampaignService {
     });
   }
 
-  /**
-   * Search campaigns by title or description
-   */
   async searchCampaigns(query: string): Promise<Campaign[]> {
     return await Campaign.createQueryBuilder("campaign")
       .where("campaign.title ILIKE :query", { query: `%${query}%` })

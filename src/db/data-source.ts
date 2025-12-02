@@ -22,10 +22,8 @@ const isRender = !!process.env.RENDER;
 const AppDataSource = new DataSource({
   type: "postgres",
 
-  // IMPORTANT: Render connection uses DATABASE_URL
   url: process.env.DATABASE_URL,
 
-  // Only needed for Render
   ssl: isRender
     ? { rejectUnauthorized: false }
     : false,

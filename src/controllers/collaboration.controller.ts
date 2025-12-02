@@ -1,14 +1,7 @@
 import { Request, Response } from "express";
 import collaborationService from "../services/collaboration.service";
 
-/**
- * Collaboration Controller
- * Handles HTTP requests for collaboration operations
- */
 export class CollaborationController {
-  /**
-   * Create a collaboration invitation
-   */
   public async createInvitation(req: Request, res: Response): Promise<Response> {
     try {
       const { collaborationType, entityId, inviteeEmail, inviteeId, role, message, expiresIn } = req.body;
@@ -59,9 +52,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Accept a collaboration invitation
-   */
   public async acceptInvitation(req: Request, res: Response): Promise<Response> {
     try {
       const { invitationId } = req.body;
@@ -99,9 +89,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Reject a collaboration invitation
-   */
   public async rejectInvitation(req: Request, res: Response): Promise<Response> {
     try {
       const { invitationId } = req.body;
@@ -139,9 +126,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Get all collaboration invitations for the current user
-   */
   public async getMyInvitations(req: Request, res: Response): Promise<Response> {
     try {
       const userId = (req as any).user?.id;
@@ -168,9 +152,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Get pending invitations for the current user
-   */
   public async getPendingInvitations(req: Request, res: Response): Promise<Response> {
     try {
       const userId = (req as any).user?.id;
@@ -197,9 +178,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Get all collaborators for a campaign
-   */
   public async getCampaignCollaborators(req: Request, res: Response): Promise<Response> {
     try {
       const { campaignId } = req.params;
@@ -227,9 +205,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Get all collaborators for a business
-   */
   public async getBusinessCollaborators(req: Request, res: Response): Promise<Response> {
     try {
       const { businessId } = req.params;
@@ -257,9 +232,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Update collaborator role
-   */
   public async updateCollaboratorRole(req: Request, res: Response): Promise<Response> {
     try {
       const { collaborationId } = req.params;
@@ -303,9 +275,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Remove a collaborator
-   */
   public async removeCollaborator(req: Request, res: Response): Promise<Response> {
     try {
       const { collaborationId } = req.params;
@@ -340,9 +309,6 @@ export class CollaborationController {
     }
   }
 
-  /**
-   * Verify invitation by token
-   */
   public async verifyInvitationToken(req: Request, res: Response): Promise<Response> {
     try {
       const { token } = req.params;

@@ -1,9 +1,6 @@
 import { body, validationResult, ValidationChain } from "express-validator";
 import { Request, Response, NextFunction } from "express";
 
-/**
- * Middleware to handle validation errors
- */
 export const handleValidationErrors = (
   req: Request,
   res: Response,
@@ -23,9 +20,6 @@ export const handleValidationErrors = (
   next();
 };
 
-/**
- * Validation rules for registration
- */
 export const validateRegister = [
   body("email")
     .isEmail()
@@ -68,9 +62,6 @@ export const validateRegister = [
     .withMessage("City must be at least 2 characters"),
 ];
 
-/**
- * Validation rules for login
- */
 export const validateLogin = [
   body("email")
     .isEmail()
@@ -80,27 +71,18 @@ export const validateLogin = [
     .withMessage("Password is required"),
 ];
 
-/**
- * Validation rules for email verification resend
- */
 export const validateResendVerification = [
   body("email")
     .isEmail()
     .withMessage("Please provide a valid email address"),
 ];
 
-/**
- * Validation rules for forgot password
- */
 export const validateForgotPassword = [
   body("email")
     .isEmail()
     .withMessage("Please provide a valid email address"),
 ];
 
-/**
- * Validation rules for reset password
- */
 export const validateResetPassword = [
   body("password")
     .isLength({ min: 8 })
@@ -111,9 +93,6 @@ export const validateResetPassword = [
     .withMessage("Password must contain at least one number"),
 ];
 
-/**
- * Validation rules for change password (authenticated)
- */
 export const validateChangePassword = [
   body("oldPassword")
     .notEmpty()
@@ -130,9 +109,6 @@ export const validateChangePassword = [
     .withMessage("Passwords do not match"),
 ];
 
-/**
- * Validation rules for Google login
- */
 export const validateGoogleLogin = [
   body("idToken")
     .notEmpty()

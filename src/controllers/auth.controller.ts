@@ -8,18 +8,13 @@ import { generateVerificationToken } from "../utils/token.utils";
 import { google } from "googleapis";
 
 export class AuthController {
-  /**
-   * Register a new user
-   */
   public async register(req: Request, res: Response): Promise<Response> {
     try {
       const { email, password, firstname, lastname, birthday, gender, phone, city } = req.body;
       
-      // Map frontend field names to backend field names
       const firstName = firstname;
       const lastName = lastname;
 
-      // Check if user already exists
       const userExists = await User.findOne({ where: { email } });
       if (userExists) {
         return res.status(400).json({
@@ -28,18 +23,15 @@ export class AuthController {
         });
       }
 
-      // Hash password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Create user
       const user = new User();
       user.email = email;
       user.password = hashedPassword;
       user.firstName = firstName;
       user.lastName = lastName;
       
-      // Add new fields
       if (birthday) user.birthday = new Date(birthday);
       if (gender) user.gender = gender;
       if (phone) user.phone = phone;
@@ -47,7 +39,6 @@ export class AuthController {
 
       user.isVerified = true;  // auto verify
       user.verificationToken = generateVerificationToken();
-      // Set verification token expiry to 24 hours
       user.verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       await user.save();
@@ -63,8 +54,6 @@ export class AuthController {
       //   console.error("Error sending verification email:", emailError);
       //   // Continue with registration even if email fails
       // }
-// DO NOT send email
-// await emailService.sendVerificationEmail(...);  ❌ remove
 
       // Generate JWT token
       const token = jwt.sign(
@@ -98,12 +87,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Login existing user
-   */
-  /**
-   * Verify user email with verification token
-   */
   // public async verifyEmail(req: Request, res: Response): Promise<Response> {
   //   try {
   //     const { token } = req.params;
@@ -162,9 +145,6 @@ export class AuthController {
 }
 
 
-  /**
-   * Send a new verification email
-   */
   // public async resendVerification(req: Request, res: Response): Promise<Response> {
   //   try {
   //     const { email } = req.body;
@@ -222,7 +202,6 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      // Find user
       const user = await User.findOne({ where: { email } });
       if (!user) {
         return res.status(401).json({
@@ -231,7 +210,6 @@ export class AuthController {
         });
       }
       
-      // // Check if email is verified
       // if (!user.isVerified) {
       //   return res.status(401).json({
       //     error: "Authentication failed",
@@ -240,7 +218,6 @@ export class AuthController {
       //   });
       // }
 
-      // Compare password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({
@@ -249,7 +226,6 @@ export class AuthController {
         });
       }
 
-      // Generate JWT token
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET || "default_secret_key",
@@ -281,35 +257,25 @@ export class AuthController {
     }
   }
 
-  /**
-   * Handle forgot password request
-   */
   public async forgotPassword(req: Request, res: Response): Promise<Response> {
     try {
       const { email } = req.body;
 
-      // Find user by email
       const user = await User.findOne({ where: { email } });
       if (!user) {
-        // Return success even if user not found for security reasons
         return res.status(200).json({
           message: "If your email is registered, you will receive password reset instructions."
         });
       }
-
-      // Generate reset token
       const resetToken = generateVerificationToken();
       
-      // Set token expiry (1 hour from now)
       const resetExpiry = new Date();
       resetExpiry.setHours(resetExpiry.getHours() + 1);
       
-      // Save token to user
       user.resetPasswordToken = resetToken;
       user.resetPasswordExpiry = resetExpiry;
       await user.save();
 
-      // Send reset email
       try {
         await emailService.sendPasswordResetEmail(
           user.email,
@@ -336,15 +302,11 @@ export class AuthController {
     }
   }
 
-  /**
-   * Reset password with token
-   */
   public async resetPassword(req: Request, res: Response): Promise<Response> {
     try {
       const { token } = req.params;
       const { password } = req.body;
 
-      // Find user with the token and check expiry
       const user = await User.findOne({ 
         where: { 
           resetPasswordToken: token,
@@ -358,7 +320,6 @@ export class AuthController {
         });
       }
 
-      // Check if token is expired
       if (!user.resetPasswordExpiry || user.resetPasswordExpiry < new Date()) {
         return res.status(400).json({
           error: "Password reset failed",
@@ -366,11 +327,9 @@ export class AuthController {
         });
       }
 
-      // Hash new password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Update user password and clear reset token
       user.password = hashedPassword;
       user.resetPasswordToken = null;
       user.resetPasswordExpiry = null;
@@ -388,9 +347,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Change password for authenticated user
-   */
   public async changePassword(req: Request, res: Response): Promise<Response> {
     try {
       const { oldPassword, newPassword } = req.body;
@@ -403,7 +359,6 @@ export class AuthController {
         });
       }
 
-      // Verify old password
       const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({
@@ -412,7 +367,6 @@ export class AuthController {
         });
       }
 
-      // Check if new password is the same as old password
       const isSamePassword = await bcrypt.compare(newPassword, user.password);
       if (isSamePassword) {
         return res.status(400).json({
@@ -421,11 +375,9 @@ export class AuthController {
         });
       }
 
-      // Hash new password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-      // Update password
       user.password = hashedPassword;
       await user.save();
 
@@ -459,9 +411,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Login with Google OAuth
-   */
   public async loginWithGoogle(req: Request, res: Response): Promise<Response> {
     try {
       const { idToken } = req.body;
@@ -473,14 +422,12 @@ export class AuthController {
         });
       }
 
-      // Create OAuth2 client
       const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
         process.env.GOOGLE_REDIRECT_URI
       );
 
-      // Verify the token
       const ticket = await oauth2Client.verifyIdToken({
         idToken: idToken,
         audience: process.env.GOOGLE_CLIENT_ID
@@ -497,11 +444,9 @@ export class AuthController {
 
       const { email, given_name, family_name, picture } = payload;
 
-      // Check if user exists
       let user = await User.findOne({ where: { email } });
 
       if (!user) {
-        // Create new user from Google data
         user = new User();
         user.email = email;
         user.firstName = given_name || "User";
@@ -513,7 +458,6 @@ export class AuthController {
         await user.save();
       }
 
-      // Generate JWT token
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET || "default_secret_key",
@@ -545,9 +489,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Update user account type (Individual, Business, Creator, etc.)
-   */
   public async updateAccountType(req: Request, res: Response): Promise<Response> {
     try {
       const user = req.user as any;
@@ -560,7 +501,6 @@ export class AuthController {
         });
       }
 
-      // Validate account type
       const validAccountTypes = ["Individual", "Business", "Creator", "None"];
       if (!accountType || !validAccountTypes.includes(accountType)) {
         return res.status(400).json({
@@ -569,7 +509,6 @@ export class AuthController {
         });
       }
 
-      // Update user account type
       const userRecord = await User.findOne({ where: { id: user.id } });
       if (!userRecord) {
         return res.status(404).json({

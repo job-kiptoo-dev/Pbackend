@@ -3,9 +3,6 @@ import jobService from "../services/job.service";
 import { JobCreateRequest } from "../types/job.types";
 
 export class JobController {
-  /**
-   * Create a new job
-   */
   public async createJob(req: Request, res: Response): Promise<Response> {
     try {
       const { owner, values, goals, skills, contents, platforms } = req.body as JobCreateRequest;
@@ -42,9 +39,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Get all jobs
-   */
   public async getAllJobs(req: Request, res: Response): Promise<Response> {
     try {
       const jobs = await jobService.getAllJobs();
@@ -62,9 +56,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Get job by ID
-   */
   public async getJobById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -99,9 +90,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Get jobs by owner
-   */
   public async getJobsByOwner(req: Request, res: Response): Promise<Response> {
     try {
       const { ownerId } = req.params;
@@ -129,9 +117,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Update job
-   */
   public async updateJob(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -166,9 +151,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Delete job
-   */
   public async deleteJob(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -202,9 +184,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Search jobs
-   */
   public async searchJobs(req: Request, res: Response): Promise<Response> {
     try {
       const { query } = req.query;
@@ -231,9 +210,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Get jobs by category
-   */
   public async getJobsByCategory(req: Request, res: Response): Promise<Response> {
     try {
       const { category } = req.params;
@@ -260,9 +236,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Create job proposal
-   */
   public async createProposal(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -303,9 +276,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Get job proposals
-   */
   public async getJobProposals(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -333,9 +303,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Update proposal status
-   */
   public async updateProposalStatus(req: Request, res: Response): Promise<Response> {
     try {
       const { id, proposalId } = req.params;
@@ -379,9 +346,6 @@ export class JobController {
     }
   }
 
-  /**
-   * Delete proposal
-   */
   public async deleteProposal(req: Request, res: Response): Promise<Response> {
     try {
       const { id, proposalId } = req.params;

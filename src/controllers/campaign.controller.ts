@@ -2,9 +2,6 @@ import { Request, Response } from "express";
 import campaignService from "../services/campaign.service";
 
 export class CampaignController {
-  /**
-   * Create a new campaign
-   */
   public async createCampaign(req: Request, res: Response): Promise<Response> {
     try {
       const { title, description, goals, budget, createdby, cocampaign, jobId } = req.body;
@@ -39,9 +36,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Get all campaigns
-   */
   public async getAllCampaigns(req: Request, res: Response): Promise<Response> {
     try {
       const campaigns = await campaignService.getAllCampaigns();
@@ -59,9 +53,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Get a campaign by ID
-   */
   public async getCampaignById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -96,9 +87,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Update a campaign
-   */
   public async updateCampaign(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -142,9 +130,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Delete a campaign
-   */
   public async deleteCampaign(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -178,9 +163,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Add milestone to campaign
-   */
   public async addMilestone(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -232,9 +214,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Update milestone
-   */
   public async updateMilestone(req: Request, res: Response): Promise<Response> {
     try {
       const { id, milestoneId } = req.params;
@@ -281,9 +260,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Delete milestone
-   */
   public async deleteMilestone(req: Request, res: Response): Promise<Response> {
     try {
       const { id, milestoneId } = req.params;
@@ -318,9 +294,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Add team to campaign
-   */
   public async addTeam(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -366,9 +339,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Delete team
-   */
   public async deleteTeam(req: Request, res: Response): Promise<Response> {
     try {
       const { id, teamId } = req.params;
@@ -403,9 +373,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Add feedback to campaign
-   */
   public async addFeedback(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -453,9 +420,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Get campaign feedback
-   */
   public async getCampaignFeedback(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -483,9 +447,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Delete feedback
-   */
   public async deleteFeedback(req: Request, res: Response): Promise<Response> {
     try {
       const { id, feedbackId } = req.params;
@@ -520,9 +481,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Search campaigns
-   */
   public async searchCampaigns(req: Request, res: Response): Promise<Response> {
     try {
       const { query } = req.query;
@@ -549,9 +507,6 @@ export class CampaignController {
     }
   }
 
-  /**
-   * Get campaigns by user
-   */
   public async getCampaignsByUser(req: Request, res: Response): Promise<Response> {
     try {
       const { createdby } = req.query;
