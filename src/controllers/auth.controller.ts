@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../db/entity/User";
+import { CreatorProfile } from "../db/entity/CreatorProfile.entity";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import axios from "axios";
@@ -537,6 +538,299 @@ export class AuthController {
       return res.status(500).json({
         error: "Account type update failed",
         message: "Internal server error while updating account type",
+      });
+    }
+  }
+
+  /**
+   * Get creator profile for authenticated user
+   */
+  public async getCreatorProfile(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in to view creator profile",
+        });
+      }
+
+      // Find or create creator profile
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+        await profile.save();
+      }
+
+      return res.status(200).json({
+        message: "Creator profile retrieved",
+        profile,
+      });
+    } catch (error) {
+      console.error("Get creator profile error:", error);
+      return res.status(500).json({
+        error: "Failed to retrieve creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update creator profile (basic info step: creatorname, about, main)
+   */
+  public async updateCreatorBasicInfo(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const { creatorname, about, main } = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      if (creatorname !== undefined) profile.creatorname = creatorname;
+      if (about !== undefined) profile.about = about;
+      if (main !== undefined) profile.main = main;
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator basic info updated",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator basic info error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update creator profile (social media step)
+   */
+  public async updateCreatorSocialMedia(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const { followers, instagram, tiktok, twitter, youtube, linkedin, facebook, social } = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      if (followers !== undefined) profile.followers = followers;
+      if (instagram !== undefined) profile.instagram = instagram;
+      if (tiktok !== undefined) profile.tiktok = tiktok;
+      if (twitter !== undefined) profile.twitter = twitter;
+      if (youtube !== undefined) profile.youtube = youtube;
+      if (linkedin !== undefined) profile.linkedin = linkedin;
+      if (facebook !== undefined) profile.facebook = facebook;
+      if (social !== undefined) profile.social = social;
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator social media updated",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator social media error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update creator profile (experience step)
+   */
+  public async updateCreatorExperience(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const { experience, milestones, collabs } = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      if (experience !== undefined) profile.experience = experience;
+      if (milestones !== undefined) profile.milestones = milestones;
+      if (collabs !== undefined) profile.collabs = collabs;
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator experience updated",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator experience error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update creator profile (categories & values step)
+   */
+  public async updateCreatorCategoriesValues(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const { category, subCategory, corevalue, coreValues, subCoreValues, topics } = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      if (category !== undefined) profile.category = category;
+      if (subCategory !== undefined) profile.subCategory = subCategory;
+      if (corevalue !== undefined) profile.corevalue = corevalue;
+      if (coreValues !== undefined) profile.coreValues = coreValues;
+      if (subCoreValues !== undefined) profile.subCoreValues = subCoreValues;
+      if (topics !== undefined) profile.topics = topics;
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator categories & values updated",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator categories & values error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update creator profile (profile media step: avatar, preview)
+   */
+  public async updateCreatorMedia(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const { avatar, preview } = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      if (avatar !== undefined) profile.avatar = avatar;
+      if (preview !== undefined) profile.preview = preview;
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator media updated",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator media error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
+      });
+    }
+  }
+
+  /**
+   * Update entire creator profile in one call
+   */
+  public async updateCreatorProfileFull(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user as any;
+      const profileData = req.body;
+
+      if (!user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in",
+        });
+      }
+
+      let profile = await CreatorProfile.findOne({ where: { user: { id: user.id } } });
+      if (!profile) {
+        profile = new CreatorProfile();
+        profile.user = user;
+      }
+
+      // Update all allowed fields
+      const allowedFields = [
+        "creatorname", "about", "main", "followers", "instagram", "tiktok", "twitter",
+        "youtube", "linkedin", "facebook", "social", "experience", "milestones", "collabs",
+        "category", "subCategory", "corevalue", "coreValues", "subCoreValues", "topics",
+        "avatar", "preview",
+      ];
+
+      allowedFields.forEach((field) => {
+        if (profileData[field] !== undefined) {
+          (profile as any)[field] = profileData[field];
+        }
+      });
+
+      await profile.save();
+
+      return res.status(200).json({
+        message: "Creator profile updated successfully",
+        profile,
+      });
+    } catch (error) {
+      console.error("Update creator profile full error:", error);
+      return res.status(500).json({
+        error: "Failed to update creator profile",
+        message: "Internal server error",
       });
     }
   }

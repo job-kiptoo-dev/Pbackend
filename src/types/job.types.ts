@@ -19,6 +19,7 @@ export interface JobValues {
 
 export interface JobCreateRequest {
   owner: string;
+  business?: string;
   values: JobValues;
   goals: string[];
   skills: string[];

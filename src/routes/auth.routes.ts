@@ -1025,4 +1025,259 @@ router.put(
   authController.updateAccountType
 );
 
+/**
+ * @swagger
+ * /api/auth/creator-profile:
+ *   get:
+ *     summary: Get creator profile
+ *     description: Retrieves the authenticated user's creator profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Creator profile retrieved
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/creator-profile",
+  authenticate,
+  authController.getCreatorProfile
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/basic-info:
+ *   put:
+ *     summary: Update creator basic info
+ *     description: Update creator name, about, and main field
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               creatorname:
+ *                 type: string
+ *               about:
+ *                 type: string
+ *               main:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Creator basic info updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/basic-info",
+  authenticate,
+  authController.updateCreatorBasicInfo
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/social-media:
+ *   put:
+ *     summary: Update creator social media
+ *     description: Update social media handles and followers
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               followers:
+ *                 type: string
+ *               instagram:
+ *                 type: string
+ *               tiktok:
+ *                 type: string
+ *               twitter:
+ *                 type: string
+ *               youtube:
+ *                 type: string
+ *               linkedin:
+ *                 type: string
+ *               facebook:
+ *                 type: string
+ *               social:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Social media updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/social-media",
+  authenticate,
+  authController.updateCreatorSocialMedia
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/experience:
+ *   put:
+ *     summary: Update creator experience
+ *     description: Update experience, milestones, and collaborations
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               experience:
+ *                 type: string
+ *               milestones:
+ *                 type: string
+ *               collabs:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Experience updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/experience",
+  authenticate,
+  authController.updateCreatorExperience
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/categories-values:
+ *   put:
+ *     summary: Update creator categories and values
+ *     description: Update category, subcategory, core values, topics
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *               subCategory:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               corevalue:
+ *                 type: string
+ *               coreValues:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               subCoreValues:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               topics:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Categories and values updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/categories-values",
+  authenticate,
+  authController.updateCreatorCategoriesValues
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/media:
+ *   put:
+ *     summary: Update creator media
+ *     description: Update avatar and preview URLs/files
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *               preview:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Media updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/media",
+  authenticate,
+  authController.updateCreatorMedia
+);
+
+/**
+ * @swagger
+ * /api/auth/creator-profile/full:
+ *   put:
+ *     summary: Update entire creator profile
+ *     description: Update all creator profile fields in one request
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Creator profile updated
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/creator-profile/full",
+  authenticate,
+  authController.updateCreatorProfileFull
+);
+
 export default router;
+

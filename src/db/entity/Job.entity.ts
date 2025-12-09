@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { User } from "./User";
+import { Business } from "./Business.entity";
 
 @Entity("jobs")
 export class Job extends BaseEntity {
@@ -74,6 +75,12 @@ export class Job extends BaseEntity {
 
   @Column()
   owner_id: number;
+
+  @ManyToOne(() => Business, { nullable: true })
+  business: Business | null;
+
+  @Column({ type: "int", nullable: true })
+  business_id: number | null;
 
   @OneToMany(() => JobProposal, (proposal) => proposal.job, {
     cascade: true,

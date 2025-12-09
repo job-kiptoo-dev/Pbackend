@@ -1,5 +1,6 @@
 import { Job, JobProposal } from "../db/entity/Job.entity";
 import { User } from "../db/entity/User";
+import { Business } from "../db/entity/Business.entity";
 import { JobValues, JobCreateRequest } from "../types/job.types";
 
 export class JobService {
@@ -11,6 +12,12 @@ export class JobService {
 
     if (!owner) {
       throw new Error("Job owner not found");
+    }
+
+    let business = null;
+    if (data.business) {
+      business = await Business.findOne({ where: { id: parseInt(data.business) } });
+      if (!business) throw new Error("Business (brand) not found");
     }
 
     const job = Job.create({
@@ -34,6 +41,8 @@ export class JobService {
       platforms: data.platforms,
       owner,
       owner_id: owner.id,
+      business: business || null,
+      business_id: business ? business.id : null,
       proposals: [],
       isActive: true,
     });
@@ -46,7 +55,7 @@ export class JobService {
    */
   async getAllJobs(): Promise<Job[]> {
     return await Job.find({
-      relations: ["owner", "proposals"],
+      relations: ["owner", "proposals", "business"],
       where: { isActive: true },
     });
   }
@@ -57,7 +66,7 @@ export class JobService {
   async getJobById(id: number): Promise<Job | null> {
     return await Job.findOne({
       where: { id },
-      relations: ["owner", "proposals", "proposals.proposer"],
+      relations: ["owner", "proposals", "proposals.proposer", "business"],
     });
   }
 

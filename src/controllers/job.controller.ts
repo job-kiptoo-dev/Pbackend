@@ -5,7 +5,7 @@ import { JobCreateRequest } from "../types/job.types";
 export class JobController {
   public async createJob(req: Request, res: Response): Promise<Response> {
     try {
-      const { owner, values, goals, skills, contents, platforms } = req.body as JobCreateRequest;
+      const { owner, business, values, goals, skills, contents, platforms } = req.body as JobCreateRequest & { business?: string };
 
       if (!owner || !values || !values.title || !values.description) {
         return res.status(400).json({
@@ -16,6 +16,7 @@ export class JobController {
 
       const job = await jobService.createJob({
         owner,
+        business,
         values,
         goals: goals || [],
         skills: skills || [],

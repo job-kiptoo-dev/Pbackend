@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jobController from "../controllers/job.controller";
 import { authenticate } from "../middleware/auth.middleware";
+import { forbidCreators } from "../middleware/role.middleware";
 
 const router = Router();
 
@@ -36,7 +37,7 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/", authenticate, jobController.createJob);
+router.post("/", authenticate, forbidCreators, jobController.createJob);
 
 /**
  * @swagger
