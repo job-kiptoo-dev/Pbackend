@@ -10,6 +10,7 @@ import campaignRoutes from "./routes/campaign.routes";
 import collaborationRoutes from "./routes/collaboration.routes";
 import jobRoutes from "./routes/job.routes";
 import brandRoutes from "./routes/brand.routes";
+import serviceRequestRoutes from "./routes/service-request.routes";
 
 // Load environment variables
 dotenv.config();
@@ -94,6 +95,7 @@ app.use("/api/campaigns", campaignRoutes);
 app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/brands", brandRoutes);
+app.use("/api/creators-campaign", serviceRequestRoutes);
 // 404 handler
 app.use("*", (req: Request, res: Response) => {
   res.status(404).json({

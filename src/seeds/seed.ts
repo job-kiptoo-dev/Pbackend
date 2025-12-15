@@ -71,19 +71,18 @@ async function seed() {
     console.log("Seeding: saved profile ->", profile.id);
 
     // Create a sample campaign
-    const campaign = Campaign.create({
-      title: "Seed Campaign",
-      description: "Campaign created by seed script",
-      goals: ["reach users", "test seed"],
-      budget: 1000,
-      createdby: creator.email,
-      cocampaign: null,
-      jobId: null,
-      active: true,
-      milestones: [],
-      teams: [],
-      feedback: [],
-    });
+    const campaign = new Campaign();
+    campaign.title = "Seed Campaign";
+    campaign.description = "Campaign created by seed script";
+    campaign.goals = ["reach users", "test seed"];
+    campaign.budget = 1000 as any;
+    campaign.createdby = creator.email;
+    campaign.cocampaign = null as any;
+    campaign.jobId = null as any;
+    campaign.active = true;
+    campaign.milestones = [] as any;
+    campaign.teams = [] as any;
+    campaign.feedback = [] as any;
     console.log("Seeding: saving campaign...");
     await campaign.save();
     console.log("Seeding: saved campaign ->", campaign.id);
@@ -135,20 +134,19 @@ async function seed() {
     console.log("Seeding: saved proposal ->", proposal.id);
 
     // Add a collaboration invite from creator to user1
-    const collab = CollaborationEntity.create({
-      collaborationType: "Campaign",
-      campaign: campaign,
-      business: null,
-      inviter: creator,
-      invitee: user1,
-      inviteeEmail: user1.email,
-      role: "Contributor",
-      status: "Accepted",
-      message: "Welcome to the campaign",
-      expiresAt: null,
-      acceptedAt: new Date(),
-      invitationToken: generateVerificationToken(),
-    });
+    const collab = new CollaborationEntity();
+    collab.collaborationType = "Campaign";
+    collab.campaign = campaign;
+    collab.business = null as any;
+    collab.inviter = creator;
+    collab.invitee = user1;
+    collab.inviteeEmail = user1.email;
+    collab.role = "Contributor" as any;
+    collab.status = "Accepted" as any;
+    collab.message = "Welcome to the campaign";
+    collab.expiresAt = null as any;
+    collab.acceptedAt = new Date();
+    collab.invitationToken = generateVerificationToken();
 
     console.log("Seeding: saving collaboration...");
     await collab.save();

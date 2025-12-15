@@ -159,6 +159,7 @@
         "Instagram"
       ],
       "owner_id": 2,
+      "business_id": null,
       "isActive": true,
       "createdAt": "2025-12-01T10:40:46.631Z",
       "updatedAt": "2025-12-01T10:40:46.631Z",
@@ -264,6 +265,7 @@
           "Instagram"
         ],
         "owner_id": 2,
+        "business_id": null,
         "isActive": true,
         "createdAt": "2025-12-01T10:40:46.631Z",
         "updatedAt": "2025-12-01T10:40:46.631Z",
@@ -371,15 +373,15 @@
       "industry": "Consumer Goods",
       "logo": "https://example.com/brand-logo.png",
       "createdAt": "2025-12-01T10:50:00.000Z",
-      "updatedAt": "2025-12-01T10:50:00.000Z"
+      "updatedAt": "2025-12-08T23:42:00.000Z"
     }
   ],
   "brandProfiles": [
     {
       "id": 1,
-      "brandname": "Seed Brand Co",
+      "brandname": "Seed Brand Updated",
       "description": "Seed Brand Co is a sample brand created for testing the BrandProfile feature.",
-      "tagline": "Planting ideas, growing brands",
+      "tagline": "Better every day",
       "website": "https://brand.example.com",
       "industry": "Consumer Goods",
       "email": "contact@seedbrand.example.com",
@@ -404,10 +406,10 @@
       "testimonials": "Our customers love Seed Brand.",
       "categories": ["Lifestyle","Consumer"],
       "createdAt": "2025-12-08T06:40:00.000Z",
-      "updatedAt": "2025-12-08T06:40:00.000Z",
+      "updatedAt": "2025-12-08T23:42:00.000Z",
       "business": {
         "id": 1,
-        "name": "Seed Brand Co",
+        "name": "Seed Brand Updated",
         "website": "https://brand.example.com",
         "email": "contact@seedbrand.example.com"
       }

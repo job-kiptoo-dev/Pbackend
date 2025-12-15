@@ -9,6 +9,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "seed": "ts-node-dev --transpile-only src/seeds/seed.ts",
     "test": "jest",
+    "test:endpoints": "ts-node test-endpoints.ts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix"
   },

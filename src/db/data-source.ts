@@ -14,6 +14,7 @@ import {
 import { CollaborationEntity } from "./entity/Collaboration.entity";
 import { Job, JobProposal } from "./entity/Job.entity";
 import { BrandProfile } from "./entity/BrandProfile.entity";
+import { ServiceRequest } from "./entity/ServiceRequest.entity";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -44,6 +45,7 @@ const AppDataSource = new DataSource({
     Job,
     JobProposal,
     BrandProfile,
+    ServiceRequest,
   ],
 
   synchronize: true,
