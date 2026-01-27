@@ -19,17 +19,22 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const isRender = !!process.env.RENDER;
+// const isRender = !!process.env.RENDER;
 
 const AppDataSource = new DataSource({
-  type: "postgres",
 
-  url: process.env.DATABASE_URL,
+ type: "postgres",
 
-  ssl: isRender
-    ? { rejectUnauthorized: false }
-    : false,
+  host: process.env.DB_HOST || "postgres",
+  port: Number(process.env.DB_PORT) || 5432,
+  username: process.env.DB_USERNAME || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
+  database: process.env.DB_DATABASE || "paza_db",
 
+  // ssl: isRender
+  //   ? { rejectUnauthorized: false }
+  //   : false,
+  //
   entities: [
     User,
     SocialVerification,
