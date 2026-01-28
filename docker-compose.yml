@@ -100,6 +100,7 @@ services:
   app:
     build: .
     container_name: my_app
+    command: npm run dev
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -108,14 +109,31 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       JWT_SECRET: ${JWT_SECRET}
       PORT: 8000
+  
     ports:
       - "8000:8000"
+
+    volumes:
+      - /usr/src/app/node_modules  # Preserve node_modules
+  
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+        - action: sync
+          path: ./tsconfig.json
+          target: /usr/src/app/tsconfig.json
+        - action: rebuild
+          path: package.json
+          target: /usr/src/app/package.json
+  
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+  
     restart: unless-stopped
 
 volumes:

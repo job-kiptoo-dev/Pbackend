@@ -60,7 +60,7 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/", authenticate, campaignController.createCampaign);
+router.post("/create", authenticate, campaignController.createCampaign);
 
 /**
  * @swagger

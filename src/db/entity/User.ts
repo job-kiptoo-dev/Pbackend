@@ -29,8 +29,8 @@ export class User extends BaseEntity {
   @Column()
   lastName: string;
 
-  @Column({ nullable: true })
-  birthday: Date;
+  @Column({ type: 'date' })
+  birthday: Date ;
 
   @Column({ nullable: true, type: "enum", enum: ["Male", "Female", "Other"] })
   gender: string;

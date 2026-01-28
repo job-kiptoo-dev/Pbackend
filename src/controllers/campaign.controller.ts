@@ -3,32 +3,73 @@ import campaignService from "../services/campaign.service";
 
 export class CampaignController {
   public async createCampaign(req: Request, res: Response): Promise<Response> {
-    try {
-      const { title, description, goals, budget, createdby, cocampaign, jobId } = req.body;
+try {
+    // Log the incoming request for debugging
+    console.log('Request body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
+    
+    const { title, description, goals, budget, createdby, cocampaign, jobId } = req.body;
 
-      if (!title) {
-        return res.status(400).json({
-          error: "Campaign creation failed",
-          message: "Campaign title is required",
-        });
-      }
-
-      const campaign = await campaignService.createCampaign({
-        title,
-        description,
-        goals,
-        budget: budget ? Number(budget) : undefined,
-        createdby,
-        cocampaign,
-        jobId,
+    // Validation with detailed error messages
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Request body is empty or invalid JSON",
+        details: "Please ensure you're sending valid JSON data with Content-Type: application/json"
       });
+    }
 
-      return res.status(201).json({
-        message: "Campaign created successfully",
-        data: campaign,
+    if (!title || title.trim() === "") {
+      return res.status(400).json({
+        error: "Validation Error",
+        message: "Campaign title is required",
+        details: "The 'title' field must be provided and cannot be empty"
       });
-    } catch (error) {
-      console.error("Create campaign error:", error);
+    }
+
+    // Optional: Add more validations
+    if (title.length > 200) {
+      return res.status(400).json({
+        error: "Validation Error",
+        message: "Campaign title is too long",
+        details: "Title must be 200 characters or less"
+      });
+    }
+
+    if (budget && (isNaN(Number(budget)) || Number(budget) < 0)) {
+      return res.status(400).json({
+        error: "Validation Error",
+        message: "Invalid budget value",
+        details: "Budget must be a positive number"
+      });
+    }
+
+    const campaign = await campaignService.createCampaign({
+      title: title.trim(),
+      description: description?.trim(),
+      goals,
+      budget: budget ? Number(budget) : undefined,
+      createdby,
+      cocampaign,
+      jobId,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Campaign created successfully",
+      data: campaign,
+    });
+  } catch (error) {
+    console.error("Create campaign error:", error);
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      return res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to create campaign",
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
       return res.status(500).json({
         error: "Campaign creation failed",
         message: "Internal server error while creating campaign",

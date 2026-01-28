@@ -44,7 +44,7 @@ export const validateRegister = [
     .isLength({ min: 2 })
     .withMessage("Last name must be at least 2 characters"),
   body("birthday")
-    .optional()
+    // .optional()
     .isISO8601()
     .withMessage("Birthday must be a valid date"),
   body("gender")
