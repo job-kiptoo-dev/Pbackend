@@ -1,383 +1,549 @@
 import { Request, Response } from "express";
 import jobService from "../services/job.service";
 import { JobCreateRequest } from "../types/job.types";
+import { 
+  ValidationError, 
+  AuthorizationError, 
+  NotFoundError 
+} from "../services/job.service";
+import { ProposalStatus } from "../db/entity/Job.entity";
 
 export class JobController {
-  public async createJob(req: Request, res: Response): Promise<Response> {
+  /**
+   * Create a new job posting
+   * POST /api/jobs
+   */
+  public createJob = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { owner, business, values, goals, skills, contents, platforms } = req.body as JobCreateRequest & { business?: string };
+      // User is guaranteed to exist and be non-creator by middleware
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const { owner, business, values, goals, skills, contents, platforms } = 
+        req.body as JobCreateRequest & { business?: string };
 
       if (!owner || !values || !values.title || !values.description) {
         return res.status(400).json({
-          error: "Job creation failed",
+          success: false,
+          error: "Validation failed",
           message: "owner, values.title, and values.description are required",
         });
       }
 
-      const job = await jobService.createJob({
-        owner,
-        business,
-        values,
-        goals: goals || [],
-        skills: skills || [],
-        contents: contents || [],
-        platforms: platforms || [],
-      });
+      const job = await jobService.createJob(
+        {
+          owner,
+          business,
+          values,
+          goals: goals || [],
+          skills: skills || [],
+          contents: contents || [],
+          platforms: platforms || [],
+        },
+        req.user.id
+      );
+
+      console.log(job);
 
       return res.status(201).json({
+        success: true,
         message: "Job created successfully",
-        job: {
-          insertedId: job.id.toString(),
-        },
         data: job,
       });
     } catch (error) {
-      console.error("Create job error:", error);
-      return res.status(500).json({
-        error: "Job creation failed",
-        message: error instanceof Error ? error.message : "Internal server error",
-      });
+      return this.handleError(error, res, "Job creation failed");
     }
   }
 
-  public async getAllJobs(req: Request, res: Response): Promise<Response> {
+  public getAllJobs = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const jobs = await jobService.getAllJobs();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const category = req.query.category as string;
+      const location = req.query.location as string;
+      const sortBy = req.query.sortBy as "createdAt" | "payment" | undefined;
+      const sortOrder = req.query.sortOrder as "ASC" | "DESC" | undefined;
+
+      // ✅ FIXED: Removed the non-existent 'jobs' parameter
+      const result = await jobService.getAllJobs({
+        page,
+        limit,
+        category,
+        location,
+        sortBy,
+        sortOrder,
+      });
+
+      console.log("Total jobs found:", result.total);
+      console.log("Jobs:", result.jobs.length);
 
       return res.status(200).json({
+        success: true,
         message: "Jobs retrieved successfully",
-        data: jobs,
+        data: result.jobs,
+        pagination: {
+          page: result.page,
+          limit,
+          total: result.total,
+          totalPages: result.totalPages,
+          hasMore: result.hasMore,
+        },
       });
     } catch (error) {
-      console.error("Get all jobs error:", error);
-      return res.status(500).json({
-        error: "Fetch jobs failed",
-        message: "Internal server error while fetching jobs",
-      });
+      return this.handleError(error, res, "Failed to fetch jobs");
     }
   }
 
-  public async getJobById(req: Request, res: Response): Promise<Response> {
+  public getJobById = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id } = req.params;
-      const jobId = Number(id);
+      const jobId = Number(req.params.id);
 
       if (isNaN(jobId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Job ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
         });
       }
 
-      const job = await jobService.getJobById(jobId);
-
-      if (!job) {
-        return res.status(404).json({
-          error: "Job not found",
-          message: `Job with ID ${jobId} not found`,
-        });
-      }
+      const job = await jobService.getJobById(jobId, req.user?.id);
 
       return res.status(200).json({
+        success: true,
         message: "Job retrieved successfully",
         data: job,
       });
     } catch (error) {
-      console.error("Get job error:", error);
-      return res.status(500).json({
-        error: "Fetch job failed",
-        message: "Internal server error while fetching job",
-      });
+      return this.handleError(error, res, "Failed to fetch job");
     }
   }
 
-  public async getJobsByOwner(req: Request, res: Response): Promise<Response> {
+  public getJobsByOwner = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { ownerId } = req.params;
-      const id = Number(ownerId);
+      const ownerId = Number(req.params.ownerId);
 
-      if (isNaN(id)) {
+      if (isNaN(ownerId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Owner ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Owner ID must be a valid number",
         });
       }
 
-      const jobs = await jobService.getJobsByOwner(id);
+      const jobs = await jobService.getJobsByOwner(ownerId, req.user?.id);
 
       return res.status(200).json({
+        success: true,
         message: "Owner jobs retrieved successfully",
         data: jobs,
       });
     } catch (error) {
-      console.error("Get owner jobs error:", error);
-      return res.status(500).json({
-        error: "Fetch jobs failed",
-        message: "Internal server error while fetching owner jobs",
-      });
+      return this.handleError(error, res, "Failed to fetch owner jobs");
     }
   }
 
-  public async updateJob(req: Request, res: Response): Promise<Response> {
+  public updateJob = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id } = req.params;
-      const jobId = Number(id);
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const jobId = Number(req.params.id);
 
       if (isNaN(jobId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Job ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
         });
       }
 
-      const job = await jobService.updateJob(jobId, req.body);
-
-      if (!job) {
-        return res.status(404).json({
-          error: "Job not found",
-          message: `Job with ID ${jobId} not found`,
-        });
-      }
+      const job = await jobService.updateJob(jobId, req.body, req.user.id);
 
       return res.status(200).json({
+        success: true,
         message: "Job updated successfully",
         data: job,
       });
     } catch (error) {
-      console.error("Update job error:", error);
-      return res.status(500).json({
-        error: "Job update failed",
-        message: error instanceof Error ? error.message : "Internal server error",
-      });
+      return this.handleError(error, res, "Failed to update job");
     }
   }
 
-  public async deleteJob(req: Request, res: Response): Promise<Response> {
+  public deleteJob = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id } = req.params;
-      const jobId = Number(id);
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const jobId = Number(req.params.id);
 
       if (isNaN(jobId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Job ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
         });
       }
 
-      const deleted = await jobService.deleteJob(jobId);
-
-      if (!deleted) {
-        return res.status(404).json({
-          error: "Job not found",
-          message: `Job with ID ${jobId} not found`,
-        });
-      }
+      await jobService.deleteJob(jobId, req.user.id);
 
       return res.status(200).json({
+        success: true,
         message: "Job deleted successfully",
       });
     } catch (error) {
-      console.error("Delete job error:", error);
-      return res.status(500).json({
-        error: "Job deletion failed",
-        message: "Internal server error while deleting job",
-      });
+      return this.handleError(error, res, "Failed to delete job");
     }
   }
 
-  public async searchJobs(req: Request, res: Response): Promise<Response> {
+  public searchJobs = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { query } = req.query;
+      const query = req.query.query as string;
 
-      if (!query || typeof query !== "string") {
+      if (!query || typeof query !== "string" || query.trim().length === 0) {
         return res.status(400).json({
-          error: "Search failed",
+          success: false,
+          error: "Invalid input",
           message: "Search query is required",
         });
       }
 
-      const jobs = await jobService.searchJobs(query);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+
+      const result = await jobService.searchJobs(query.trim(), { page, limit });
 
       return res.status(200).json({
+        success: true,
         message: "Search completed successfully",
-        data: jobs,
+        data: result.jobs,
+        pagination: {
+          total: result.total,
+          page,
+          limit,
+        },
       });
     } catch (error) {
-      console.error("Search jobs error:", error);
-      return res.status(500).json({
-        error: "Search failed",
-        message: "Internal server error while searching jobs",
-      });
+      return this.handleError(error, res, "Search failed");
     }
   }
 
-  public async getJobsByCategory(req: Request, res: Response): Promise<Response> {
+  public getJobsByCategory = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { category } = req.params;
 
-      if (!category) {
+      if (!category || category.trim().length === 0) {
         return res.status(400).json({
-          error: "Invalid request",
+          success: false,
+          error: "Invalid input",
           message: "Category is required",
         });
       }
 
-      const jobs = await jobService.getJobsByCategory(category);
+      const jobs = await jobService.getJobsByCategory(category.trim());
 
       return res.status(200).json({
+        success: true,
         message: "Category jobs retrieved successfully",
         data: jobs,
       });
     } catch (error) {
-      console.error("Get category jobs error:", error);
-      return res.status(500).json({
-        error: "Fetch jobs failed",
-        message: "Internal server error while fetching category jobs",
-      });
+      return this.handleError(error, res, "Failed to fetch category jobs");
     }
   }
 
-  public async createProposal(req: Request, res: Response): Promise<Response> {
+  /**
+   * Create a proposal (creators only)
+   */
+  public createProposal = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id } = req.params;
-      const jobId = Number(id);
-      const { proposerId, title, description, proposedBudget, deliverables } = req.body;
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const jobId = Number(req.params.id);
+      const { title, description, proposedBudget, deliverables } = req.body;
 
       if (isNaN(jobId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Job ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
         });
       }
 
-      if (!proposerId || !title) {
+      if (!title || title.trim().length === 0) {
         return res.status(400).json({
-          error: "Proposal creation failed",
-          message: "proposerId and title are required",
+          success: false,
+          error: "Validation failed",
+          message: "Proposal title is required",
         });
       }
 
-      const proposal = await jobService.createProposal(jobId, proposerId, {
-        title,
-        description,
-        proposedBudget,
-        deliverables,
-      });
+      const proposal = await jobService.createProposal(
+        jobId,
+        req.user.id,
+        {
+          title: title.trim(),
+          description,
+          proposedBudget,
+          deliverables,
+        }
+      );
 
       return res.status(201).json({
+        success: true,
         message: "Proposal created successfully",
         data: proposal,
       });
     } catch (error) {
-      console.error("Create proposal error:", error);
-      return res.status(500).json({
-        error: "Proposal creation failed",
-        message: error instanceof Error ? error.message : "Internal server error",
-      });
+      return this.handleError(error, res, "Failed to create proposal");
     }
   }
 
-  public async getJobProposals(req: Request, res: Response): Promise<Response> {
+  public getJobProposals = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id } = req.params;
-      const jobId = Number(id);
-
-      if (isNaN(jobId)) {
-        return res.status(400).json({
-          error: "Invalid request",
-          message: "Job ID must be a number",
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
         });
       }
 
-      const proposals = await jobService.getJobProposals(jobId);
+      const jobId = Number(req.params.id);
+
+      if (isNaN(jobId)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
+        });
+      }
+
+      const proposals = await jobService.getJobProposals(jobId, req.user.id);
 
       return res.status(200).json({
+        success: true,
         message: "Proposals retrieved successfully",
         data: proposals,
       });
     } catch (error) {
-      console.error("Get proposals error:", error);
-      return res.status(500).json({
-        error: "Fetch proposals failed",
-        message: "Internal server error while fetching proposals",
-      });
+      return this.handleError(error, res, "Failed to fetch proposals");
     }
   }
 
-  public async updateProposalStatus(req: Request, res: Response): Promise<Response> {
+  public getMyProposals = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id, proposalId } = req.params;
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const proposals = await jobService.getUserProposals(req.user.id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Your proposals retrieved successfully",
+        data: proposals,
+      });
+    } catch (error) {
+      return this.handleError(error, res, "Failed to fetch your proposals");
+    }
+  }
+
+  public updateProposalStatus = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const proposalId = Number(req.params.proposalId);
       const { status } = req.body;
 
-      const pId = Number(proposalId);
-
-      if (isNaN(pId)) {
+      if (isNaN(proposalId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Proposal ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Proposal ID must be a valid number",
         });
       }
 
       if (!status) {
         return res.status(400).json({
-          error: "Invalid request",
+          success: false,
+          error: "Validation failed",
           message: "Status is required",
         });
       }
 
-      const proposal = await jobService.updateProposalStatus(pId, status);
-
-      if (!proposal) {
-        return res.status(404).json({
-          error: "Proposal not found",
-          message: `Proposal with ID ${pId} not found`,
+      if (!Object.values(ProposalStatus).includes(status as ProposalStatus)) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation failed",
+          message: `Invalid status. Valid values are: ${Object.values(ProposalStatus).join(", ")}`,
         });
       }
 
+      const proposal = await jobService.updateProposalStatus(
+        proposalId,
+        status as ProposalStatus,
+        req.user.id
+      );
+
       return res.status(200).json({
+        success: true,
         message: "Proposal status updated successfully",
         data: proposal,
       });
     } catch (error) {
-      console.error("Update proposal error:", error);
-      return res.status(500).json({
-        error: "Update failed",
-        message: error instanceof Error ? error.message : "Internal server error",
-      });
+      return this.handleError(error, res, "Failed to update proposal status");
     }
   }
 
-  public async deleteProposal(req: Request, res: Response): Promise<Response> {
+  public deleteProposal = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { id, proposalId } = req.params;
-      const pId = Number(proposalId);
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
 
-      if (isNaN(pId)) {
+      const proposalId = Number(req.params.proposalId);
+
+      if (isNaN(proposalId)) {
         return res.status(400).json({
-          error: "Invalid request",
-          message: "Proposal ID must be a number",
+          success: false,
+          error: "Invalid input",
+          message: "Proposal ID must be a valid number",
         });
       }
 
-      const deleted = await jobService.deleteProposal(pId);
-
-      if (!deleted) {
-        return res.status(404).json({
-          error: "Proposal not found",
-          message: `Proposal with ID ${pId} not found`,
-        });
-      }
+      await jobService.deleteProposal(proposalId, req.user.id);
 
       return res.status(200).json({
+        success: true,
         message: "Proposal deleted successfully",
       });
     } catch (error) {
-      console.error("Delete proposal error:", error);
-      return res.status(500).json({
-        error: "Proposal deletion failed",
-        message: "Internal server error while deleting proposal",
+      return this.handleError(error, res, "Failed to delete proposal");
+    }
+  }
+
+  public getJobStats = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const jobId = Number(req.params.id);
+
+      if (isNaN(jobId)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
+        });
+      }
+
+      const stats = await jobService.getJobStats(jobId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Job statistics retrieved successfully",
+        data: stats,
+      });
+    } catch (error) {
+      return this.handleError(error, res, "Failed to fetch job statistics");
+    }
+  }
+
+  public canApply = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        });
+      }
+
+      const jobId = Number(req.params.id);
+
+      if (isNaN(jobId)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid input",
+          message: "Job ID must be a valid number",
+        });
+      }
+
+      const canApply = await jobService.canUserApply(jobId, req.user.id);
+
+      return res.status(200).json({
+        success: true,
+        data: { canApply },
+      });
+    } catch (error) {
+      return this.handleError(error, res, "Failed to check eligibility");
+    }
+  }
+
+  private handleError(error: unknown, res: Response, defaultMessage: string): Response {
+    console.error("Controller error:", error);
+
+    if (error instanceof ValidationError) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        message: error.message,
       });
     }
+
+    if (error instanceof AuthorizationError) {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden",
+        message: error.message,
+      });
+    }
+
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({
+        success: false,
+        error: "Not found",
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : defaultMessage,
+    });
   }
 }
 

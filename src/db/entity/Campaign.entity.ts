@@ -25,7 +25,7 @@ export class Campaign extends BaseEntity {
   @Column({ type: "simple-array", nullable: true })
   goals: string[];
 
-  @Column({ type: "decimal", nullable: true })
+  @Column({ type: "decimal", default: 0 })
   budget: number;
 
   @Column({ default: true })

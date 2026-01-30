@@ -3,12 +3,13 @@ import { Campaign, CampaignMilestone, CampaignTeam, CampaignFeedback } from "../
 export class CampaignService {
   async createCampaign(data: {
     title: string;
-    description?: string;
-    goals?: string[];
-    budget?: number;
-    createdby?: string;
-    cocampaign?: string;
-    jobId?: string;
+    description: string;
+    goals: string[];
+    budget: number;
+    createdby: string;
+    cocampaign: string;
+    jobId: string;
+    milestones: Partial<CampaignMilestone>[]; // Add this
   }): Promise<Campaign> {
     const campaign = Campaign.create({
       title: data.title,
@@ -23,6 +24,14 @@ export class CampaignService {
       teams: [],
       feedback: [],
     });
+
+ if (data.milestones && data.milestones.length > 0) {
+    campaign.milestones = data.milestones.map(m => {
+      const milestone = new CampaignMilestone();
+      Object.assign(milestone, m);
+      return milestone;
+    });
+  }
 
     return await campaign.save();
   }

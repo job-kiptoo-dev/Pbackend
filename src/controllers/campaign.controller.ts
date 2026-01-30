@@ -8,7 +8,7 @@ try {
     console.log('Request body:', req.body);
     console.log('Content-Type:', req.headers['content-type']);
     
-    const { title, description, goals, budget, createdby, cocampaign, jobId } = req.body;
+    const { title, description, goals, budget, createdby, cocampaign, jobId,milestones } = req.body;
 
     // Validation with detailed error messages
     if (!req.body || Object.keys(req.body).length === 0) {
@@ -48,10 +48,11 @@ try {
       title: title.trim(),
       description: description?.trim(),
       goals,
-      budget: budget ? Number(budget) : undefined,
+      budget: budget ? Number(budget) : 0,
       createdby,
       cocampaign,
       jobId,
+      milestones
     });
 
     return res.status(201).json({
